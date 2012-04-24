@@ -163,8 +163,13 @@ DependencyDetection.defer do
 
       def render_with_newrelic(*args, &block)
         setup(*args, &block)
-        str = "View/#{NewRelic::Agent::Instrumentation::Rails3::ActionView::NewRelic.template_metric(find_partial.identifier)}/Partial"
-        trace_execution_scoped str do
+
+        if partial = find_partial
+          str = "View/#{NewRelic::Agent::Instrumentation::Rails3::ActionView::NewRelic.template_metric(find_partial.identifier)}/Partial"
+          trace_execution_scoped str do
+            render_without_newrelic(*args, &block)
+          end
+        else
           render_without_newrelic(*args, &block)
         end
       end
